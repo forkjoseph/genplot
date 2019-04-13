@@ -50,3 +50,7 @@ $ sudo apt-get install texlive-extra-utils
 - [ ] histogram!!!! Ugh, maybe after summer? Idk
 - [ ] Object hierarchy that inherits a common gen object
 - [ ] **smart** data file parser 
+
+#### Reliability
+If it works, great! If not, Joseph is **NOT** reliable that it doesn't work
+(that's why I added stupid ¯\\\_(ツ)_/¯)
