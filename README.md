@@ -1,4 +1,4 @@
-# Stupid Graph Generator ¯\\_(ツ)_/¯
+# Stupid Graph Generator ¯\\\_(ツ)_/¯
 
 ### Limitation
 It draws one graph PER run... :( So, Joseph suggests using a bash script to call
