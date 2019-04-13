@@ -5,7 +5,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 class Line:
-    def __init__(self):
+    def __init__(self, debug=False):
+        self.debug = debug
         self.legend = None
         self.xlabel = 'Frame Number'
         self.ylabel = 'Latency (in msec)'

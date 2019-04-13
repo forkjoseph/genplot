@@ -6,7 +6,8 @@ import scipy.stats as ss
 import matplotlib.pyplot as plt
 
 class Bar:
-    def __init__(self):
+    def __init__(self, debug=False):
+        self.debug = debug
         self.legends = []
         self.xmin = float('inf')
         self.xmax = -1.0

@@ -1,10 +1,12 @@
 import sys
 sys.dont_write_bytecode = True
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 
 class CDF:
-    def __init__(self):
+    def __init__(self, debug=False):
+        self.debug = debug
         self.legend = None
         self.fnames = []
         self.fname = None
@@ -18,7 +20,7 @@ class CDF:
     def load(self, fname):
         data = []
         withxaxis = False
-        self.fname = fname
+        self.fname = os.path.basename(fname)
         with open(fname) as f:
             lines = f.readlines()
             for c in lines:
@@ -29,6 +31,8 @@ class CDF:
                         if '*/' in legend:
                             legend = legend.replace('*/', '')
                         self.legend = legend.strip()
+                        if self.debug is True:
+                            print '[DEBUG] setting legend in parse', self.legend
                     continue
                 try:
                     c = float(c)
@@ -57,6 +61,9 @@ class CDF:
                 label = self.fname
         else:
             label = label
+
+        if self.debug is True:
+            print '[DEBUG]', label, self.fname
         if ax is None:
             plt.plot(xs, ys, label=label)
         else:

@@ -4,7 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 class Scat:
-    def __init__(self):
+    def __init__(self, debug=False):
+        self.debug = debug
         self.legend = None
         self.fnames = []
         self.xmin = float('inf')

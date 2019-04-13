@@ -1,5 +1,5 @@
 #!/usr/bin/env python2.7
-""" simple multiple ploting tool with one script """
+""" simplest ploting tool for a paper! """
 import sys, os
 sys.dont_write_bytecode = True
 import argparse
@@ -10,34 +10,52 @@ from gencdf import CDF
 from genscat import Scat
 from genbar import Bar
 
-parser = argparse.ArgumentParser(description='Process some integers.')
-parser.add_argument('datafiles', nargs='*')
-parser.add_argument('--basedir', dest='basedir', type=str)
-parser.add_argument('--baseiter', dest='baseiter', type=str)
-parser.add_argument('--mode', dest='mode', type=str, required=True, \
-        choices=['scat', 'bar', 'histo', 'line', 'cdf'])
+def with_color(c, s):
+    return "\x1b[%dm%s\x1b[0m" % (c, s)
+
+LIMITATION = "limitation: draws one graph PER run... :(\n" + \
+        "Joseph suggests using a bash script to call this genplot " + \
+        "in order to generate multiple graphs at once."
+
+parser = argparse.ArgumentParser(description="Simplest plotting tool\n", 
+        epilog=with_color(31, LIMITATION))
+## mandatory arguments to plot the graph!!
+parser.add_argument('datafiles', nargs='*', 
+        help="data file to draw (ex. ./genplot.py -m cdf abc.dat)")
+parser.add_argument('-m', dest='mode', type=str, required=True,
+        choices=['scat', 'bar', 'histo', 'line', 'cdf'],
+        help="which plot mode to use")
+## EITHER or !!!! 
+parser.add_argument('--basedir', dest='basedir', type=str,
+        help="base directory to iterate for data file")
+parser.add_argument('--baseiter', dest='baseiter', type=str,
+        help="base **iterator** mode (useful when feeding data w/ a format)")
+## optional arguements 
 parser.add_argument('--xmin', dest='xmin', type=float, default=None)
-parser.add_argument('--xmax', dest='xmax', type=float)
-parser.add_argument('--ymin', dest='ymin', type=float)
-parser.add_argument('--ymax', dest='ymax', type=float)
-parser.add_argument('--xtick', dest='xtick', type=float)
+parser.add_argument('--xmax', dest='xmax', type=float, default=None)
+parser.add_argument('--ymin', dest='ymin', type=float, default=None)
+parser.add_argument('--ymax', dest='ymax', type=float, default=None)
+parser.add_argument('--xtick', dest='xtick', type=float,
+        help="????????????????? TBD ~_~ ")
 parser.add_argument('--xticks', dest='xticks', type=list)
 parser.add_argument('--xlabel', dest='xlabel', type=str)
 parser.add_argument('--ylabel', dest='ylabel', type=str)
-parser.add_argument('-o', dest='outname', type=str)
 parser.add_argument('--legends', dest='legends', type=str, nargs='+')
+parser.add_argument('-o', dest='outname', type=str,
+        help="PDF file name (ex. abc.pdf or /tmp/abc)")
+parser.add_argument('--debug', dest='debug', type=bool, default=False)
 args = parser.parse_args()
 
-def with_color(c, s):
-    return "\x1b[%dm%s\x1b[0m" % (c, s)
 
 if __name__ == '__main__':
     plotmode = args.mode.lower()
     xlim = (args.xmin, args.xmax)
     ylim = (args.ymin, args.ymax)
+    debug = args.debug
 
     if args.basedir and args.baseiter:
-        print '[error] both args cannot be supported! (choose either)'
+        print '[ERROR] both args cannot be supported! (choose either)'
+        # parser.print_help()
         sys.exit(-1)
 
     filenames = []
@@ -45,7 +63,6 @@ if __name__ == '__main__':
         filenames = args.datafiles
         lastslash = False
     elif not args.basedir and args.baseiter:
-        # print 'baseiter', args.baseiter
         baseiter = args.baseiter
         for f in args.datafiles:
             filenames.append(baseiter.format(f))
@@ -60,29 +77,31 @@ if __name__ == '__main__':
                 filenames.append(basedir + f)
             else:
                 filenames.append(basedir + '/' + f)
+    if len(filenames) < 1:
+        print '[ERROR] you must provide data files to draw mannnnn!'
+        sys.exit(-1)
 
     if args.legends is not None:
         legends = args.legends
-        # legends = args.legends.split(',')
-        # legends = [x.strip() for x in legends]
     else:
         legends = []
 
-    print '== INFOS =='
+    print '=' * 32, 'INFOS', '=' * 33
     print '  datafiles:', filenames
     print '  plotmode:', plotmode 
     print '  limits: {}, {}'.format(xlim, ylim)
     print '  lables: x=\"{}\", y=\"{}\"'.format(args.xlabel, args.ylabel)
     print '  legends: {}'.format(legends)
+    print '=' * 70
 
     if plotmode == 'line':
-        obj = Line()
+        obj = Line(debug)
     elif plotmode == 'cdf':
-        obj = CDF()
+        obj = CDF(debug)
     elif plotmode == 'scat' or plotmode == 'scatter':
-        obj = Scat()
+        obj = Scat(debug)
     elif plotmode == 'bar':
-        obj = Bar()
+        obj = Bar(debug)
     
     if args.xlabel is not None:
         obj.xlabel = args.xlabel
@@ -106,6 +125,8 @@ if __name__ == '__main__':
         else:
             if len(legends) > idx:
                 label = legends[idx]
+                if args.debug is True:
+                    print '[DEBUG] label for', idx, label
             obj.draw(xs, ys, label=label, ax=ax)
 
         if args.xmin  == None and args.xmax == None:
@@ -117,15 +138,18 @@ if __name__ == '__main__':
                 xlim = (min(xs), max(xlim[1], max(xs)))
             else:
                 xlim = (min(xlim[0], min(xs)), max(xlim[1], max(xs)))
-            print xlim
+
+            if args.debug is True:
+                print '[DEBUG]', xlim
+
         elif xlim[1] == None:
             xlim = (xlim[0], max(xs))
         elif xlim[0] == None:
             xlim = (min(xs), xlim[1])
 
         if plotmode == 'cdf':
-            print with_color(31, 'tails: ' + obj.tail())
-            print with_color(31, 'tails: ' + obj.stats())
+            print '[BONUS]', with_color(31, 'tails: ' + obj.tail())
+            print '[BONUS]', with_color(31, 'tails: ' + obj.stats())
 
     if plotmode == 'cdf':
         if ylim[0] is None and ylim[1] is None:
@@ -135,10 +159,8 @@ if __name__ == '__main__':
         elif ylim[0] is None and ylim[1] is not None:
             ylim = (0.0, ylim[1])
 
-    # if plotmode == 'cdf': # xlim[0] == None:
-    #     xlim = (0.0, xlim[1])
-    print 'xlim', xlim
-    print 'ylim', ylim
+    print '[INFO] xlim', xlim
+    print '[INFO] ylim', ylim
     plt.ylim(ylim[0], ylim[1])
     plt.xlim(xlim[0], xlim[1])
 
@@ -148,7 +170,7 @@ if __name__ == '__main__':
     if plotmode == 'bar':
         ypos = np.arange(len(obj.legends))
         legends = obj.legends
-        print legends
+        print '[INFO] legends', legends
         plt.xticks(ypos, legends, rotation=45)
         plt.margins(0.05)
         plt.subplots_adjust(bottom=0.175)
@@ -165,7 +187,7 @@ if __name__ == '__main__':
 
     if args.xtick is not None:
         xtick_interval = int(args.xtick)
-        print 'gonna set xtick to', xtick_interval
+        print '[INFO] gonna set xtick to', xtick_interval
         xticks = [x for x in range(0, int(xlim[1]) + xtick_interval, xtick_interval)]
         plt.xticks(xticks, fontsize=14)
     else:
