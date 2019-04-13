@@ -1,4 +1,5 @@
 # Stupid Graph Generator ¯\\\_(ツ)_/¯
+![cover](samples/cover.png)
 
 ### Limitation
 It draws one graph PER run... :( So, Joseph suggests using a bash script to call
@@ -45,6 +46,7 @@ $ brew install pdfcrop
 $ sudo apt-get install texlive-extra-utils  
 ```
 
+---
 #### TODO
 - [ ] advanced usage examples 
 - [ ] histogram!!!! Ugh, maybe after summer? Idk
