@@ -5,6 +5,8 @@ It draws one graph PER run... :( So, Joseph suggests using a bash script to call
 ``genplot.py`` in order to generate multiple graphs at once. To be provided in
 samples directory...
 
+It must have **correct** data file format, i.e., 1 row per datafile
+
 ### Examples
 ```bash
 ## basic
@@ -44,4 +46,7 @@ $ sudo apt-get install texlive-extra-utils
 ```
 
 #### TODO
-- [ ] 
+- [ ] advanced usage examples 
+- [ ] histogram!!!! Ugh, maybe after summer? Idk
+- [ ] Object hierarchy that inherits a common gen object
+- [ ] **smart** data file parser 
