@@ -4,63 +4,57 @@ sys.dont_write_bytecode = True
 import numpy as np
 import scipy.stats as ss
 import matplotlib.pyplot as plt
+from base import Base as base
 
-class Bar:
-    def __init__(self, debug=False):
-        self.debug = debug
-        self.legends = []
+class Bar(base):
+    def __init__(self, debug=False, adjust=None):
+        super(Bar, self).__init__(debug, adjust)
+        self.gentype = 'Bar'
+        self.xlabel = 'Bar'
+        self.ylabel = 'Latency (in msec)'
         self.xmin = float('inf')
         self.xmax = -1.0
         self.ymin = 0.0
         self.ymax = 1.0
-        self.xlabel = 'Bar'
-        self.ylabel = 'Latency (in msec)'
         self.confidence = 0.90
-        self.ftups = {}
 
     def load(self, fname):
-        tup = {}
-        data = []
-        with open(fname) as f:
-            lines = f.readlines()
-            for c in lines:
-                c = c.strip()
-                if '/*' in c or '#' in c:
-                    if 'legend' in c.lower():
-                        legend = c.split(':')[1]
-                        if '*/' in legend:
-                            legend = legend.replace('*/', '')
-                        tup['legend'] = legend.strip()
-                    continue
-                c = float(c)
-                # c *= 1000.0
-                data.append(c)
+        return super(Bar, self).load(fname)
+    def loadall(self, fnames):
+        return super(Bar, self).loadall(fnames)
 
-        tup["data"] = data
-        tup["dlen"] = len(data)
-        tup["avg"] = np.mean(data)
-        tup["std"] = np.std(data)
-        tup["err"] = ss.t.ppf(self.confidence, tup["avg"]) * tup["std"]
-
-        tup["low"] = tup["avg"] - tup["err"]
-        tup["high"] = tup["avg"] + tup["err"]
-        tup["dmin"] = min(tup["data"])
-        tup["dmax"] = max(tup["data"])
-
-        tup['idx'] = len(self.ftups)
-        self.ftups[fname] = tup
-        self.legends.append(tup['legend'])
-
-        return tup["avg"], tup["err"]
-
-    def draw(self, fname, label): 
-        tup = self.ftups[fname]
-        if 'legend' in tup:
-            label = tup['legend']
-        print label, tup['avg']
-        plt.bar(tup['idx'], tup['avg'], align='center', alpha=0.5,)
-        # plt.bar(tup['idx'], tup['avg'], yerr=tup['err'], align='center', alpha=0.5,)
+    def draw(self, xs, ys, opt, label=None, ax=None):
+        if ax is None:
+            plt.bar(xs, ys, yerr=opt, align='center', alpha=0.5,)
+        else:
+            ax.bar(xs, ys, yerr=opt, align='center', alpha=0.5,)
         return
+
+    def drawall(self, labels=None, ax=None, limits=None, legends=[]):
+        labels = []
+        for obj in self.objs:
+            xs, ys, opt = obj.xs, obj.ys, obj.opt
+            if len(legends) == 0:
+                label = obj.label
+            else:
+                if len(legends) >= obj.idx:
+                    label = legends[obj.idx]
+                else:
+                    label = obj.label
+
+            labels.append(label)
+            self.draw(xs, ys, opt, ax=ax)
+
+        ypos = np.arange(len(self.objs))
+        legends = labels
+        print '[INFO] legends', legends
+        plt.xticks(ypos, legends, rotation=45)
+        plt.margins(0.05)
+        plt.subplots_adjust(bottom=0.175)
+        plt.legend(prop={'size':16})
+
+        plt.xlabel(self.xlabel, fontsize=14)
+        plt.ylabel(self.ylabel, fontsize=14)
 
     def stat(self, fname):
         targets = ['dlen', 'low', 'high', 'dmin', 'dmax', 

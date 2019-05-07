@@ -1,100 +1,84 @@
-''' generate line plot from data '''
-import sys
+import sys, os
 sys.dont_write_bytecode = True
 import numpy as np
 import matplotlib.pyplot as plt
+from base import Base as base
 
-class Line:
-    def __init__(self, debug=False):
-        self.debug = debug
-        self.legend = None
+class Line(base):
+    def __init__(self, debug=False, adjust=None):
+        super(Line, self).__init__(debug, adjust)
+        self.gentype = 'Line'
         self.xlabel = 'Frame Number'
         self.ylabel = 'Latency (in msec)'
+        self.xmin = 0.0
+        self.xmax = float('inf')
+        self.ymin = 0.0
+        self.ymax = float('inf')
 
     def load(self, fname):
-        data = []
-        with open(fname) as f:
-            lines = f.readlines()
-            for c in lines:
-                c = c.strip()
-                # if '/*' in c or '#' in c:
-                if '/*' in c:
-                    continue
-                if '#' in c:
-                    if 'legend' in c:
-                        legend = c.split(':')[1]
-                        self.legend = legend.strip()
-                    continue
-                c = float(c)
-                data.append(c)
-        tss = [x for x in range(len(data))]
-        """ filtering for -1 """
-        data = [x if x >= 0 else float('inf') for x in data]
-        return tss, data
+        return super(Line, self).load(fname)
+
+    def loadall(self, fnames):
+        return super(Line, self).loadall(fnames)
 
     def draw(self, xs, ys, label, ax=None):
-        if self.legend:
-            label = self.legend
         if ax is None:
             plt.plot(xs, ys, label=label)
         else:
             ax.plot(xs, ys, label=label, linewidth='2')
 
-if __name__ == '__main__':
-    ymin, ymax = 0, int(max([x if x != float('inf') else 0 for x in data]))
-    # figname = None
-    # if len(sys.argv) > 2:
-    #     if len(sys.argv) == 3:
-    #         figname = sys.argv[2]
-    #         try:
-    #             isint = int(figname)
-    #             help()
-    #         except ValueError:
-    #             pass
-    #     elif len(sys.argv) == 4:
-    #         xmin = int(sys.argv[2])
-    #         xmax = int(sys.argv[3])
-    #     elif len(sys.argv) == 5:
-    #         xmin = int(sys.argv[2])
-    #         xmax = int(sys.argv[3])
-    #         figname = sys.argv[4]
-    #         try:
-    #             isint = int(figname)
-    #             help()
-    #         except ValueError:
-    #             pass
-    #     else:
-    #         help()
+    def drawall(self, labels=None, ax=None, limits=None, legends=[]):
+        for obj in self.objs:
+            xs, ys = obj.xs, obj.ys
+            label = obj.label
+            if len(legends) >= obj.idx:
+                label = legends[obj.idx]
+            self.draw(xs, ys, label=label, ax=ax)
 
-    print 'Y-min:', ymin
-    print 'Y-max:', ymax
-    plt.xlabel("Time")
-    plt.ylabel("Value")
-        
-    plt.plot(xs, data)
-    # plt.xlim(xmin, xmax)
-    plt.ylim(ymin, ymax)
+        if limits is None:
+            ''' x-axis --> len of data '''
+            ''' y-axis --> min/max of data '''
+            ylim = (float('inf'), float('-inf'))
+            
+            ''' update only xlim for CDF '''
+            for obj in self.objs:
+                ys = obj.ys
+                ymin = min(ys)
+                ymax = max(ys)
+                if ymin < ylim[0]: 
+                    ylim = (ymin, ylim[1])
+                if ymax > ylim[1]: 
+                    ylim = (ylim[0], ymax)
+            ''' well... let's just set xlim=(0, own) '''
+            # ylim = (0.0, ylim[1])
+            print '[DEBUG] Y-axis limit %s' % (str(ylim))
+#         else:
+#             xlim = limits[0]
+#             ylim = limits[1]
+#             if ylim[0] is None and ylim[1] is None:
+#                 # reset
+#                 ylim = (0.0, 1.0)
+#             if xlim[0] is None:
+#                 xlim = (0.0, xlim[1])
 
-    plt.show()
+        # plt.xlim(xlim[0], xlim[1])
+        print '[DEBUG] Y-axis limit %s' % (str(ylim))
+        if ax is not None:
+            ax.set_ylim(ylim[0], ylim[1])
+        else:
+            plt.ylim(ylim[0], ylim[1])
 
-# print 'min:', xmin
-# print 'max:', xmax
-# if figname:
-#     import os
-#     savename = os.getcwd() + '/' + figname
-#     print 'saving to', savename + '.pdf'
+        plt.legend(loc='best', prop={'size':16})
+        plt.xlabel(self.xlabel, fontsize=14)
+        plt.ylabel(self.ylabel, fontsize=14)
 
-# plt.scatter(xs, data)
-# plt.xlabel("Time")
-# plt.ylabel("Value")
-# if figname:
-#     plt.savefig(savename + '.pdf')
-#     from subprocess import call
-#     call(["pdfcrop", savename + '.pdf'])
-#     call(["rm", "-f", savename + '.pdf'])
-#     call(["mv", savename + "-crop.pdf", savename + ".pdf"])
-# plt.show()
+        ### TODO: why are ticks not updated after limit changes?
+        ## x ticks -> 8 items
+        ## y ticks -> 6 items
+        xticks = plt.gca().get_xticks()
+        plt.xticks(xticks, fontsize=14)
+        print xticks
+        yticks = plt.gca().get_yticks()
+        plt.yticks(yticks, fontsize=14)
+        print yticks
 
-# for x, y in zip(xs, data):
-#     if y <= 300:
-#         print x,y
