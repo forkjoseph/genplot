@@ -2,11 +2,16 @@ import sys
 sys.dont_write_bytecode = True
 import os
 from model import *
+import multiprocessing as mp
+from multiprocessing import cpu_count, Pool
+from multiprocessing import Process
+from multiprocessing import Manager
 
 class Base(object):
-    def __init__(self, debug=False, adjust=None):
+    def __init__(self, debug=False, adjust=None, usemp=False):
         self.debug = debug
         self.adjust = adjust
+        self.usemp = usemp
         self.labels = []
         self.fnames = []
         self.objs = []
@@ -43,8 +48,13 @@ class Base(object):
         return xs, ys, opt
 
     def loadall(self, fnames):
-        for idx, fname in enumerate(fnames):
-            self.load(fname)
+        if self.usemp is False:
+            for idx, fname in enumerate(fnames):
+                self.load(fname)
+                if self.debug is True:
+                    print ('[DEBUG] %s is loaded' % (fname))
+        else:
+            print ('multi-thread is not supported yet...!')
         return
 
 def with_color(c, s):

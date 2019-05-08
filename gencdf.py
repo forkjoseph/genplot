@@ -26,7 +26,7 @@ class CDF(base):
         if ax is None:
             plt.plot(xs, ys, label=label)
         else:
-            ax.plot(xs, ys, label=label, linewidth='2')
+            ax.plot(xs, ys, label=label, linewidth=2.0)
         return
 
     def drawall(self, labels=None, ax=None, limits=None, legends=[]):

@@ -3,6 +3,8 @@
 import sys
 sys.dont_write_bytecode = True
 import argparse
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 from os.path import basename
@@ -21,7 +23,7 @@ parser = argparse.ArgumentParser(description="Simplest plotting tool\n",
 ## mandatory arguments to plot the graph!!
 parser.add_argument('datafiles', nargs='*', 
         help="data file to draw (ex. ./genplot.py -m cdf abc.dat)")
-parser.add_argument('--mode', dest='mode', type=str, required=True,
+parser.add_argument('-m', '--mode', dest='mode', type=str, required=True,
         choices=['scat', 'bar', 'histo', 'line', 'cdf'],
         help="which plot mode to use")
 ## EITHER or !!!! 
@@ -43,7 +45,10 @@ parser.add_argument('--ylabel', dest='ylabel', type=str)
 parser.add_argument('--legends', dest='legends', type=str, nargs='+')
 parser.add_argument('-o', dest='outname', type=str,
         help="PDF file name (ex. abc.pdf or /tmp/abc)")
-parser.add_argument('--debug', dest='debug', type=bool, default=False)
+parser.add_argument('-M', '--mp', action='store_true',
+        help="Use multithreads to load data (helpful for big datasets)")
+parser.add_argument('-D', '--debug', action='store_true')
+parser.add_argument('-V', '--verbose', action='store_true')
 args = parser.parse_args()
 
 
@@ -138,7 +143,7 @@ if __name__ == '__main__':
 
     fig = plt.figure(figsize=(10, 4.75))
     ax = fig.add_subplot(111)
-    ax.grid(which='major', axis='y', linestyle='--', linewidth='0.2')
+    ax.grid(which='major', axis='y', linestyle='--', linewidth=0.2)
 
     print filenames
     obj.loadall(filenames)
