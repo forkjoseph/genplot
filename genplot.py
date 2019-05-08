@@ -117,6 +117,7 @@ if __name__ == '__main__':
         adjust = args.adjust
     else:
         adjust = None
+    usemp = args.mp
 
     print '=' * 32, 'INFOS', '=' * 33
     print '  datafiles:', filenames
@@ -128,13 +129,13 @@ if __name__ == '__main__':
     print '=' * 70
 
     if plotmode == 'line':
-        obj = Line(debug, adjust)
+        obj = Line(debug, adjust, usemp)
     elif plotmode == 'cdf':
-        obj = CDF(debug, adjust)
+        obj = CDF(debug, adjust, usemp)
     elif plotmode == 'scat' or plotmode == 'scatter':
-        obj = Scat(debug, adjust)
+        obj = Scat(debug, adjust, usemp)
     elif plotmode == 'bar':
-        obj = Bar(debug, adjust)
+        obj = Bar(debug, adjust, usemp)
     
     if args.xlabel is not None:
         obj.xlabel = args.xlabel

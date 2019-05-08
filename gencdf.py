@@ -6,8 +6,8 @@ from base import Base as base
 from base import *
 
 class CDF(base):
-    def __init__(self, debug=False, adjust=None):
-        super(CDF, self).__init__(debug, adjust)
+    def __init__(self, debug=False, adjust=None, usemp=False):
+        super(CDF, self).__init__(debug, adjust, usemp)
         self.gentype = 'CDF'
         self.xlabel = 'Latency (in msec)'
         self.ylabel = 'CDF'
@@ -16,8 +16,8 @@ class CDF(base):
         self.ymin = 0.0
         self.ymax = 1.0
 
-    def load(self, fname):
-        return super(CDF, self).load(fname)
+    def load(self, fname, myidx=0):
+        return super(CDF, self).load(fname, myidx)
 
     def loadall(self, fnames):
         return super(CDF, self).loadall(fnames)
