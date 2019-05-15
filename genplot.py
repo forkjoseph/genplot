@@ -42,7 +42,8 @@ parser.add_argument('--xlabel', dest='xlabel', type=str)
 parser.add_argument('--ylabel', dest='ylabel', type=str)
 parser.add_argument('--legends', dest='legends', type=str, nargs='+')
 parser.add_argument('-o', dest='outname', type=str,
-        help="PDF file name (ex. abc.pdf or /tmp/abc)")
+        help="PDF file name (ex. abc.pdf or /tmp/abc). Default is PDF format. " + 
+        "For PNG output, make sure to pass FILENAME.png as arguement")
 parser.add_argument('--debug', dest='debug', type=bool, default=False)
 args = parser.parse_args()
 
@@ -57,8 +58,12 @@ def saveplot():
         else:
             savename = basedir + '/' + args.outname
     suffix = '.pdf'
-    if savename.endswith(suffix):
-        savename = savename.replace(suffix, '')
+    realsuffix = '.pdf'
+    if savename.endswith('.png'):
+        realsuffix = '.png'
+        savename = savename.replace(realsuffix, '')
+    elif savename.endswith(suffix):
+        savename = savename.replace(realsuffix, '')
     print '[INFO] saving to {}{}'.format(savename, suffix)
 
     plt.savefig(savename + suffix)
@@ -66,8 +71,12 @@ def saveplot():
     call(["pdfcrop", savename + suffix])
     call(["rm", "-f", savename + suffix])
     call(["mv", savename + "-crop.pdf", savename + suffix])
-
-
+    if realsuffix == '.png':
+        print '[INFO] converting to {}{}'.format(savename, realsuffix)
+        call(["convert", "-density", "400", savename + suffix, savename + realsuffix])
+        call(["rm", "-f", savename + suffix])
+    print '[INFO] saved to {}{}'.format(savename, realsuffix)
+    return
 
 if __name__ == '__main__':
     plotmode = args.mode.lower()
