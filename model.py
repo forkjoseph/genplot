@@ -13,6 +13,7 @@ class DataModel(object):
         self.fname = None
         self.adjust = adjust
         self.debug = debug
+        # print ('IS DEBUG? ', self.debug)
 
     def parse(self, fname):
         self.fname = os.path.basename(fname)
@@ -20,14 +21,25 @@ class DataModel(object):
             for c in f.readlines():
                 c = c.strip()
                 if '/*' in c or '#' in c:
+                    # if self.debug is True:
+                    #     print ('[DEBUG] # detected for', fname, c)
                     if 'legend' in c.lower():
+                        if self.debug is True:
+                            print ('[DEBUG] legend detected!')
                         legend = c.split(':')[1]
                         if '*/' in legend:
                             legend = legend.replace('*/', '')
                         self.label = legend.strip()
                         self.legend = legend.strip()
                         if self.debug is True:
-                            print '[DEBUG] setting legend in parse \"%s\"' % self.label
+                            print ('[DEBUG] setting legend in parse \"%s\"' % self.label)
+                    else:
+                        legend = c.split('#')[1]
+                        self.label = legend.strip()
+                        self.legend = legend.strip()
+
+                        if self.debug is True:
+                            print ('[DEBUG] setting legend in parse \"%s\"' % self.label)
                     continue
                 try:
                     c = float(c)
@@ -40,7 +52,7 @@ class DataModel(object):
                     #     print '\x1b[33m[ERROR] can\'t parse %s\x1b[0m' % (c)
                     #     raise e
                     else:
-                        print '\x1b[33m[WARNING] skipping string \"%s\"\x1b[0m' % (c)
+                        print ('\x1b[33m[WARNING] skipping string \"%s\"\x1b[0m' % (c))
                         continue
 
                 if self.adjust is not None:
@@ -57,7 +69,7 @@ class DataCDF(DataModel):
         self.sorted_data = []
         self.yvals = []
 
-    def load(self, fname):
+    def load(self, fname, myidx=0):
         super(DataCDF, self).parse(fname)
         self.sorted_data = np.sort(self.data)
         self.yvals = np.arange(len(self.sorted_data))/float(len(self.sorted_data)-1)
@@ -75,7 +87,7 @@ class DataLine(DataModel):
         super(DataLine, self).__init__(idx, debug, adjust)
         self.tss = []
 
-    def load(self, fname):
+    def load(self, fname, myidx=0):
         super(DataLine, self).parse(fname)
         self.tss = [x for x in range(len(self.data))]
         """ filtering for -1 """
@@ -92,7 +104,7 @@ class DataScat(DataModel):
         super(DataScat, self).__init__(idx, debug, adjust)
         self.tss = []
 
-    def load(self, fname):
+    def load(self, fname, myidx=0):
         super(DataScat, self).parse(fname)
         self.tss = [x for x in range(len(self.data))]
         self.xs = self.tss
@@ -110,7 +122,7 @@ class DataHisto(DataModel):
         self.xmax = float('inf')
         self.bins = []
 
-    def load(self, fname):
+    def load(self, fname, myidx=0):
         super(DataHisto, self).parse(fname)
         self.xmin, self.xmax = min(self.data), max(self.data)
         self.bins = range(self.xmin, self.xmax, self.bin)
@@ -131,7 +143,7 @@ class DataBar(DataModel):
         self.high = .0
         self.opt = .0
 
-    def load(self, fname):
+    def load(self, fname, myidx=0):
         super(DataBar, self).parse(fname)
         self.dlen = len(self.data)
         self.avg = np.mean(self.data)
