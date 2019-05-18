@@ -4,7 +4,7 @@ import sys
 sys.dont_write_bytecode = True
 import argparse
 import matplotlib
-matplotlib.use('Agg')
+# matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 from os.path import basename
@@ -47,7 +47,9 @@ parser.add_argument('-o', dest='outname', type=str,
         help="PDF file name (ex. abc.pdf or /tmp/abc). Default is PDF format. " + 
         "For PNG output, make sure to pass FILENAME.png as arguement")
 parser.add_argument('-M', '--mp', action='store_true',
-        help="Use multithreads to load data (helpful for big datasets)")
+        help="[EXP] Use multithreads to load data (helpful for big datasets)")
+parser.add_argument('-P', '--parsed', action='store_true',
+        help="[EXP] For bar graph, use parsed data")
 parser.add_argument('-D', '--debug', action='store_true')
 parser.add_argument('-V', '--verbose', action='store_true')
 args = parser.parse_args()
@@ -69,17 +71,27 @@ def saveplot():
         savename = savename.replace(realsuffix, '')
     elif savename.endswith(suffix):
         savename = savename.replace(realsuffix, '')
-    print '[INFO] saving to {}{}'.format(savename, suffix)
+    
+    import os
+    dname = os.path.dirname(os.path.realpath(savename))
+    bname = os.path.basename(savename)
+    __tmp = dname + '/.tmp-' + bname + suffix
+    __tmp2 = dname + '/.tmp2-' + bname + suffix
 
-    plt.savefig(savename + suffix)
+    print '[INFO] saving to {}{}'.format(savename, suffix)
+    # if args.debug is True:
+    #     print '[DEBUG] saving to %s' % (__tmp)
+
+    plt.savefig(__tmp)
     from subprocess import call
-    call(["pdfcrop", savename + suffix])
-    call(["rm", "-f", savename + suffix])
-    call(["mv", savename + "-crop.pdf", savename + suffix])
+    call(["pdfcrop", __tmp, __tmp2])
+    call(["rm", "-f", __tmp])
+    if realsuffix == '.pdf':
+        call(["mv", __tmp2, savename + suffix])
+
     if realsuffix == '.png':
         print '[INFO] converting to {}{}'.format(savename, realsuffix)
-        call(["convert", "-density", "400", savename + suffix, savename + realsuffix])
-        call(["rm", "-f", savename + suffix])
+        call(["convert", "-density", "400", __tmp2, savename + realsuffix])
     print '[INFO] saved to {}{}'.format(savename, realsuffix)
     return
 
@@ -144,7 +156,9 @@ if __name__ == '__main__':
     elif plotmode == 'scat' or plotmode == 'scatter':
         obj = Scat(debug, adjust, usemp)
     elif plotmode == 'bar':
-        obj = Bar(debug, adjust, usemp)
+        is_parsed = args.parsed
+        print '[INFO] data is already parsed?', is_parsed
+        obj = Bar(debug, adjust=adjust, usemp=usemp, parsed=is_parsed)
     
     if args.xlabel is not None:
         obj.xlabel = args.xlabel
@@ -155,7 +169,7 @@ if __name__ == '__main__':
     ax = fig.add_subplot(111)
     ax.grid(which='major', axis='y', linestyle='--', linewidth=0.2)
 
-    print filenames
+    print '[INFO] file nemas:', filenames
     obj.loadall(filenames)
 
     limits = (xlim, ylim)
@@ -263,4 +277,5 @@ if __name__ == '__main__':
     
     if args.outname:
         saveplot()
+    print 'show...'
     plt.show()
