@@ -52,8 +52,13 @@ class DataModel(object):
                     #     print '\x1b[33m[ERROR] can\'t parse %s\x1b[0m' % (c)
                     #     raise e
                     else:
-                        print ('\x1b[33m[WARNING] skipping string \"%s\"\x1b[0m' % (c))
-                        continue
+                        tmp = c.split('\t')
+                        if len(tmp) == 2:
+                            idx = tmp[0]
+                            c = float(tmp[1])
+                        else:
+                            print ('\x1b[33m[WARNING] skipping string \"%s\"\x1b[0m' % (c))
+                            continue
 
                 if self.adjust is not None:
                     tmp = self.adjust
@@ -143,8 +148,14 @@ class DataBar(DataModel):
         self.high = .0
         self.opt = .0
 
-    def load(self, fname, myidx=0):
-        super(DataBar, self).parse(fname)
+    def load(self, fname, myidx=0, argv=None):
+        if self.skip_parsing is True:
+            self.data = [fname] 
+            if argv is not None:
+                self.label = argv
+                self.legend = argv
+        else:
+            super(DataBar, self).parse(fname)
         self.dlen = len(self.data)
         self.avg = np.mean(self.data)
         self.std = np.std(self.data)

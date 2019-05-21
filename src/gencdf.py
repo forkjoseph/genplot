@@ -51,7 +51,8 @@ class CDF(base):
                     xlim = (xlim[0], xmax)
             ''' well... let's just set xlim=(0, own) '''
             xlim = (0.0, xlim[1])
-            print xlim
+            if self.debug is True:
+                print '[DEBUG] xlimit:', xlim
         else:
             xlim = limits[0]
             ylim = limits[1]
@@ -76,8 +77,9 @@ class CDF(base):
 
     def stat(self):
         for obj in self.objs:
+            print '[BONUS] for file \"%s\"' % (obj.fname)
             print '[BONUS]', with_color(31, 'tails: ' + self.tail(obj))
-            print '[BONUS]', with_color(31, 'tails: ' + self.stats(obj))
+            print '[BONUS]', with_color(31, 'stats: ' + self.stats(obj))
             
         
     ''' returns 95, 99, 99.9 by default '''
@@ -92,15 +94,15 @@ class CDF(base):
         for idx, y in enumerate(ys):
             if th999 is False:
                 if y < 0.999:
-                    tails['99.9'] = lastx
+                    tails['99.9'] = '{:.3f}'.format(lastx)
                     th999 = True
             elif th99 is False:
                 if y < 0.99:
-                    tails['99.0'] = lastx
+                    tails['99.0'] = '{:.3f}'.format(lastx)
                     th99 = True
             elif th95 is False:
                 if y < 0.95:
-                    tails['95.0'] = lastx
+                    tails['95.0'] = '{:.3f}'.format(lastx)
                     th95 = True
                     break
             lastx = xs[idx]
@@ -108,9 +110,11 @@ class CDF(base):
 
     def stats(self, obj):
         xmin, xmax = np.nanmin(obj.data), np.nanmax(obj.data)
-        median = np.nanmedian(obj.data)
-        # mean = np.nanmean(self.data)
-        # return str({'min': xmin, 'max': xmax,
-        #         'median': median, 'mean': mean})
+        xmin = '{:.3f}'.format(xmin)
+        xmax = '{:.3f}'.format(xmax)
+        median = '{:.3f}'.format(np.nanmedian(obj.data))
+        mean = '{:.3f}'.format(np.nanmean(obj.data))
         return str({'min': xmin, 'max': xmax,
-                'median': median, })
+                'median': median, 'mean': mean})
+        # return str({'min': xmin, 'max': xmax,
+        #         'median': median, })

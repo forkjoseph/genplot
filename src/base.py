@@ -17,15 +17,16 @@ class Base(object):
         self.fnames = []
         self.objs = []
 
-    def load(self, fname, myidx):
+    def load(self, fname, myidx, argv=None):
         gentype = self.gentype
         if self.usemp is False:
             idx = len(self.objs)
         else:
             idx = myidx
 
-        if self.debug is True:
-            print '[DEBUG] %d. gentype %s' % (idx, gentype)
+        # if self.debug is True:
+        #     print '[DEBUG] %d. gentype %s' % (idx, gentype)
+            # print self.__dict__
 
         if 'CDF' == gentype:
             obj = DataCDF(idx, self.debug, self.adjust)
@@ -38,7 +39,8 @@ class Base(object):
             obj = DataHisto(idx, self.debug, self.adjust, opt)
         elif 'Bar' == gentype:
             opt = 0.90 # confidence
-            obj = DataBar(idx, self.debug, self.adjust, opt)
+            obj = DataBar(idx, self.debug, self.adjust, argv)
+            obj.skip_parsing = self.skip_parsing
         else:
             raise Exception('Unsupported gentype')
 
@@ -51,7 +53,10 @@ class Base(object):
         else:
             self.fnames[idx] = fname
 
-        xs, ys, opt = obj.load(fname)
+        if argv is not None:
+            xs, ys, opt = obj.load(fname, argv=argv)
+        else:
+            xs, ys, opt = obj.load(fname)
 
         if self.usemp is False:
             self.objs.append(obj)

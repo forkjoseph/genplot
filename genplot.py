@@ -1,4 +1,5 @@
 #!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
 """ simplest ploting tool for a paper! """
 import sys
 sys.dont_write_bytecode = True
@@ -8,11 +9,11 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 from os.path import basename
-from base import *
-from genline import Line
-from gencdf import CDF
-from genscat import Scat
-from genbar import Bar
+from src.base import *
+from src.genline import Line
+from src.gencdf import CDF
+from src.genscat import Scat
+from src.genbar import Bar
 
 LIMITATION = "limitation: draws one graph PER run... :(\n" + \
         "Joseph suggests using a bash script to call this genplot " + \
@@ -43,7 +44,7 @@ parser.add_argument('--xticks', dest='xticks', type=list)
 parser.add_argument('--xlabel', dest='xlabel', type=str)
 parser.add_argument('--ylabel', dest='ylabel', type=str)
 parser.add_argument('--legends', dest='legends', type=str, nargs='+')
-parser.add_argument('-o', dest='outname', type=str,
+parser.add_argument('-o', '--output', dest='outname', type=str,
         help="PDF file name (ex. abc.pdf or /tmp/abc). Default is PDF format. " + 
         "For PNG output, make sure to pass FILENAME.png as arguement")
 parser.add_argument('-M', '--mp', action='store_true',
@@ -53,7 +54,6 @@ parser.add_argument('-P', '--parsed', action='store_true',
 parser.add_argument('-D', '--debug', action='store_true')
 parser.add_argument('-V', '--verbose', action='store_true')
 args = parser.parse_args()
-
 
 def saveplot():
     figname = args.outname
@@ -77,21 +77,19 @@ def saveplot():
     bname = os.path.basename(savename)
     __tmp = dname + '/.tmp-' + bname + suffix
     __tmp2 = dname + '/.tmp2-' + bname + suffix
-
     print '[INFO] saving to {}{}'.format(savename, suffix)
-    # if args.debug is True:
-    #     print '[DEBUG] saving to %s' % (__tmp)
 
     plt.savefig(__tmp)
     from subprocess import call
     call(["pdfcrop", __tmp, __tmp2])
     call(["rm", "-f", __tmp])
     if realsuffix == '.pdf':
-        call(["mv", __tmp2, savename + suffix])
+        call(["cp", __tmp2, savename + suffix])
 
     if realsuffix == '.png':
         print '[INFO] converting to {}{}'.format(savename, realsuffix)
         call(["convert", "-density", "400", __tmp2, savename + realsuffix])
+    call(["rm", "-f", __tmp2])
     print '[INFO] saved to {}{}'.format(savename, realsuffix)
     return
 
@@ -176,106 +174,17 @@ if __name__ == '__main__':
 
     if limits[0][0] is None and limits[0][1] is None and \
         limits[1][0] is None and limits[1][1] is None:
-            print 'Limits are none...'
             limits = None
+            if debug is True:
+                print '[DEBUG] Limits are none...'
+
     obj.drawall(ax=ax, limits=limits, legends=legends)
 
     if plotmode == 'cdf':
         obj.stat()
-
-
-
-    # for idx, f in enumerate(filenames):
-    #     xs, ys, opt = obj.load(f)
-
-    #     if len(legends) > idx:
-    #         label = legends[idx]
-    #         if args.debug is True:
-    #             print '[DEBUG] label for', idx, label
-    #     else:
-    #         label = basename(f)
-    #         if args.debug is True:
-    #             print '[DEBUG] using filename as label for', label
-
-    #     if plotmode == 'bar':
-    #         obj.draw(f, label=label, ax=ax)
-    #         continue
-    #     else:
-    #         obj.draw(xs, ys, label=label, ax=ax)
-
-    #     if args.xmin  == None and args.xmax == None:
-    #         if xlim[0] == None and xlim[1] == None:
-    #             xlim = (min(xs), max(xs))
-    #         elif xlim[1] == None:
-    #             xlim = (min(xlim[0], min(xs)), max(xs))
-    #         elif xlim[0] == None:
-    #             xlim = (min(xs), max(xlim[1], max(xs)))
-    #         else:
-    #             xlim = (min(xlim[0], min(xs)), max(xlim[1], max(xs)))
-
-    #         if args.debug is True:
-    #             print '[DEBUG]', xlim
-
-    #     elif xlim[1] == None:
-    #         xlim = (xlim[0], max(xs))
-    #     elif xlim[0] == None:
-    #         xlim = (min(xs), xlim[1])
-
-    #     # if plotmode == 'cdf':
-    #     #     print '[BONUS]', with_color(31, 'tails: ' + obj.tail())
-    #     #     print '[BONUS]', with_color(31, 'tails: ' + obj.stats())
-
-    # if plotmode == 'cdf':
-    #     if ylim[0] is None and ylim[1] is None:
-    #         ylim = (0, 1.0)
-    #     elif ylim[0] is not None and ylim[1] is None:
-    #         ylim = (ylim[0], 1.0)
-    #     elif ylim[0] is None and ylim[1] is not None:
-    #         ylim = (0.0, ylim[1])
-
-    # print '[INFO] xlim', xlim
-    # print '[INFO] ylim', ylim
-    # plt.ylim(ylim[0], ylim[1])
-    # plt.xlim(xlim[0], xlim[1])
-
-    # # ticks
-    # # if plotmode == 'scat':
-    # #     plt.yticks(np.arange(ylim[0], ylim[1] + 0.05, 0.05))
-
-    # ''' legends '''
-    # if plotmode == 'bar':
-    #     ypos = np.arange(len(obj.legends))
-    #     legends = obj.legends
-    #     print '[INFO] legends', legends
-    #     plt.xticks(ypos, legends, rotation=45)
-    #     plt.margins(0.05)
-    #     plt.subplots_adjust(bottom=0.175)
-    # if plotmode == 'cdf':
-    #     plt.legend(loc='lower right')
-    # elif plotmode == 'scat':
-    #     plt.legend(loc='lower right')
-    #     # plt.legend(loc='upper right')
-    # else:
-    #     plt.legend(loc='best')
-
-    # plt.xlabel(obj.xlabel, fontsize=14)
-    # plt.ylabel(obj.ylabel, fontsize=14)
-
-    # if args.xtick is not None:
-    #     xtick_interval = int(args.xtick)
-    #     print '[INFO] gonna set xtick to', xtick_interval
-    #     xticks = [x for x in range(0, int(xlim[1]) + xtick_interval, xtick_interval)]
-    #     plt.xticks(xticks, fontsize=14)
-    # else:
-    #     xticks = plt.gca().get_xticks()
-    #     plt.xticks(xticks, fontsize=14)
-    # yticks = plt.gca().get_yticks()
-    # plt.yticks(yticks, fontsize=14)
-
-    # plt.legend(prop={'size':16})
-
     
     if args.outname:
         saveplot()
-    print 'show...'
+    print '[INFO] showing the graph ¯\\_(ツ)_/¯'
+
     plt.show()
