@@ -1,17 +1,19 @@
 #!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
 """ simplest ploting tool for a paper! """
-import sys, os
+import sys
 sys.dont_write_bytecode = True
 import argparse
+import matplotlib
+# matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
-from genline import Line
-from gencdf import CDF
-from genscat import Scat
-from genbar import Bar
-
-def with_color(c, s):
-    return "\x1b[%dm%s\x1b[0m" % (c, s)
+from os.path import basename
+from src.base import *
+from src.genline import Line
+from src.gencdf import CDF
+from src.genscat import Scat
+from src.genbar import Bar
 
 LIMITATION = "limitation: draws one graph PER run... :(\n" + \
         "Joseph suggests using a bash script to call this genplot " + \
@@ -22,7 +24,7 @@ parser = argparse.ArgumentParser(description="Simplest plotting tool\n",
 ## mandatory arguments to plot the graph!!
 parser.add_argument('datafiles', nargs='*', 
         help="data file to draw (ex. ./genplot.py -m cdf abc.dat)")
-parser.add_argument('-m', dest='mode', type=str, required=True,
+parser.add_argument('-m', '--mode', dest='mode', type=str, required=True,
         choices=['scat', 'bar', 'histo', 'line', 'cdf'],
         help="which plot mode to use")
 ## EITHER or !!!! 
@@ -31,6 +33,7 @@ parser.add_argument('--basedir', dest='basedir', type=str,
 parser.add_argument('--baseiter', dest='baseiter', type=str,
         help="base **iterator** mode (useful when feeding data w/ a format)")
 ## optional arguements 
+parser.add_argument('--adjust', dest='adjust', type=str, default=None)
 parser.add_argument('--xmin', dest='xmin', type=float, default=None)
 parser.add_argument('--xmax', dest='xmax', type=float, default=None)
 parser.add_argument('--ymin', dest='ymin', type=float, default=None)
@@ -41,11 +44,54 @@ parser.add_argument('--xticks', dest='xticks', type=list)
 parser.add_argument('--xlabel', dest='xlabel', type=str)
 parser.add_argument('--ylabel', dest='ylabel', type=str)
 parser.add_argument('--legends', dest='legends', type=str, nargs='+')
-parser.add_argument('-o', dest='outname', type=str,
-        help="PDF file name (ex. abc.pdf or /tmp/abc)")
-parser.add_argument('--debug', dest='debug', type=bool, default=False)
+parser.add_argument('-o', '--output', dest='outname', type=str,
+        help="PDF file name (ex. abc.pdf or /tmp/abc). Default is PDF format. " + 
+        "For PNG output, make sure to pass FILENAME.png as arguement")
+parser.add_argument('-M', '--mp', action='store_true',
+        help="[EXP] Use multithreads to load data (helpful for big datasets)")
+parser.add_argument('-P', '--parsed', action='store_true',
+        help="[EXP] For bar graph, use parsed data")
+parser.add_argument('-D', '--debug', action='store_true')
+parser.add_argument('-V', '--verbose', action='store_true')
 args = parser.parse_args()
 
+def saveplot():
+    figname = args.outname
+    if args.basedir is None:
+        savename = args.outname
+    else:
+        if lastslash is True:
+            savename = basedir + args.outname
+        else:
+            savename = basedir + '/' + args.outname
+    suffix = '.pdf'
+    realsuffix = '.pdf'
+    if savename.endswith('.png'):
+        realsuffix = '.png'
+        savename = savename.replace(realsuffix, '')
+    elif savename.endswith(suffix):
+        savename = savename.replace(realsuffix, '')
+    
+    import os
+    dname = os.path.dirname(os.path.realpath(savename))
+    bname = os.path.basename(savename)
+    __tmp = dname + '/.tmp-' + bname + suffix
+    __tmp2 = dname + '/.tmp2-' + bname + suffix
+    print '[INFO] saving to {}{}'.format(savename, suffix)
+
+    plt.savefig(__tmp)
+    from subprocess import call
+    call(["pdfcrop", __tmp, __tmp2])
+    call(["rm", "-f", __tmp])
+    if realsuffix == '.pdf':
+        call(["cp", __tmp2, savename + suffix])
+
+    if realsuffix == '.png':
+        print '[INFO] converting to {}{}'.format(savename, realsuffix)
+        call(["convert", "-density", "400", __tmp2, savename + realsuffix])
+    call(["rm", "-f", __tmp2])
+    print '[INFO] saved to {}{}'.format(savename, realsuffix)
+    return
 
 if __name__ == '__main__':
     plotmode = args.mode.lower()
@@ -86,22 +132,31 @@ if __name__ == '__main__':
     else:
         legends = []
 
+    if args.adjust is not None:
+        adjust = args.adjust
+    else:
+        adjust = None
+    usemp = args.mp
+
     print '=' * 32, 'INFOS', '=' * 33
     print '  datafiles:', filenames
     print '  plotmode:', plotmode 
     print '  limits: {}, {}'.format(xlim, ylim)
     print '  lables: x=\"{}\", y=\"{}\"'.format(args.xlabel, args.ylabel)
     print '  legends: {}'.format(legends)
+    print '  adjust: %s' % (adjust)
     print '=' * 70
 
     if plotmode == 'line':
-        obj = Line(debug)
+        obj = Line(debug, adjust, usemp)
     elif plotmode == 'cdf':
-        obj = CDF(debug)
+        obj = CDF(debug, adjust, usemp)
     elif plotmode == 'scat' or plotmode == 'scatter':
-        obj = Scat(debug)
+        obj = Scat(debug, adjust, usemp)
     elif plotmode == 'bar':
-        obj = Bar(debug)
+        is_parsed = args.parsed
+        print '[INFO] data is already parsed?', is_parsed
+        obj = Bar(debug, adjust=adjust, usemp=usemp, parsed=is_parsed)
     
     if args.xlabel is not None:
         obj.xlabel = args.xlabel
@@ -110,112 +165,26 @@ if __name__ == '__main__':
 
     fig = plt.figure(figsize=(10, 4.75))
     ax = fig.add_subplot(111)
-    ax.grid(which='major', axis='y', linestyle='--', linewidth='0.2')
+    ax.grid(which='major', axis='y', linestyle='--', linewidth=0.2)
 
-    for idx, f in enumerate(filenames):
-        xs, ys = obj.load(f)
-        from os.path import basename
-        bname = basename(f)
-        label = bname
+    print '[INFO] file nemas:', filenames
+    obj.loadall(filenames)
 
-        # print f, len(xs), len(ys)
-        if plotmode == 'bar':
-            obj.draw(f, label=bname, ax=ax)
-            continue
-        else:
-            if len(legends) > idx:
-                label = legends[idx]
-                if args.debug is True:
-                    print '[DEBUG] label for', idx, label
-            obj.draw(xs, ys, label=label, ax=ax)
+    limits = (xlim, ylim)
 
-        if args.xmin  == None and args.xmax == None:
-            if xlim[0] == None and xlim[1] == None:
-                xlim = (min(xs), max(xs))
-            elif xlim[1] == None:
-                xlim = (min(xlim[0], min(xs)), max(xs))
-            elif xlim[0] == None:
-                xlim = (min(xs), max(xlim[1], max(xs)))
-            else:
-                xlim = (min(xlim[0], min(xs)), max(xlim[1], max(xs)))
+    if limits[0][0] is None and limits[0][1] is None and \
+        limits[1][0] is None and limits[1][1] is None:
+            limits = None
+            if debug is True:
+                print '[DEBUG] Limits are none...'
 
-            if args.debug is True:
-                print '[DEBUG]', xlim
-
-        elif xlim[1] == None:
-            xlim = (xlim[0], max(xs))
-        elif xlim[0] == None:
-            xlim = (min(xs), xlim[1])
-
-        if plotmode == 'cdf':
-            print '[BONUS]', with_color(31, 'tails: ' + obj.tail())
-            print '[BONUS]', with_color(31, 'tails: ' + obj.stats())
+    obj.drawall(ax=ax, limits=limits, legends=legends)
 
     if plotmode == 'cdf':
-        if ylim[0] is None and ylim[1] is None:
-            ylim = (0, 1.0)
-        elif ylim[0] is not None and ylim[1] is None:
-            ylim = (ylim[0], 1.0)
-        elif ylim[0] is None and ylim[1] is not None:
-            ylim = (0.0, ylim[1])
-
-    print '[INFO] xlim', xlim
-    print '[INFO] ylim', ylim
-    plt.ylim(ylim[0], ylim[1])
-    plt.xlim(xlim[0], xlim[1])
-
-    # ticks
-    # if plotmode == 'scat':
-    #     plt.yticks(np.arange(ylim[0], ylim[1] + 0.05, 0.05))
-    if plotmode == 'bar':
-        ypos = np.arange(len(obj.legends))
-        legends = obj.legends
-        print '[INFO] legends', legends
-        plt.xticks(ypos, legends, rotation=45)
-        plt.margins(0.05)
-        plt.subplots_adjust(bottom=0.175)
-    if plotmode == 'cdf':
-        plt.legend(loc='lower right')
-    elif plotmode == 'scat':
-        plt.legend(loc='lower right')
-        # plt.legend(loc='upper right')
-    else:
-        plt.legend(loc='best')
-
-    plt.xlabel(obj.xlabel, fontsize=14)
-    plt.ylabel(obj.ylabel, fontsize=14)
-
-    if args.xtick is not None:
-        xtick_interval = int(args.xtick)
-        print '[INFO] gonna set xtick to', xtick_interval
-        xticks = [x for x in range(0, int(xlim[1]) + xtick_interval, xtick_interval)]
-        plt.xticks(xticks, fontsize=14)
-    else:
-        xticks = plt.gca().get_xticks()
-        plt.xticks(xticks, fontsize=14)
-    yticks = plt.gca().get_yticks()
-    plt.yticks(yticks, fontsize=14)
-
-    plt.legend(prop={'size':16})
-
+        obj.stat()
+    
     if args.outname:
-        figname = args.outname
-        if args.basedir is None:
-            savename = args.outname
-        else:
-            if lastslash is True:
-                savename = basedir + args.outname
-            else:
-                savename = basedir + '/' + args.outname
+        saveplot()
+    print '[INFO] showing the graph ¯\\_(ツ)_/¯'
 
-        suffix = '.pdf'
-        if savename.endswith(suffix):
-            savename = savename.replace(suffix, '')
-        print '[INFO] saving to {}{}'.format(savename, suffix)
-
-        plt.savefig(savename + suffix)
-        from subprocess import call
-        call(["pdfcrop", savename + suffix])
-        call(["rm", "-f", savename + suffix])
-        call(["mv", savename + "-crop.pdf", savename + suffix])
     plt.show()
