@@ -2,11 +2,9 @@ import sys
 sys.dont_write_bytecode = True
 import os
 from model import *
+from util import with_color
 import multiprocessing as mp
 from threading import Thread
-# from multiprocessing import cpu_count, Pool
-# from multiprocessing import Process
-# from multiprocessing import Manager
 
 class Base(object):
     def __init__(self, debug=False, adjust=None, usemp=False):
@@ -79,9 +77,11 @@ class Base(object):
             self.fnames = [None for x in range(dlen)]
             self.objs = [None for x in range(dlen)]
             self.labels = [None for x in range(dlen)]
-            # print self.fnames
-            # print self.objs
-            # print self.labels
+            if self.debug is True:
+                print '[DEBUG] fnames: %s' % (self.fnames)
+                print '[DEBUG] objs: %s' % (self.objs)
+                print '[DEBUG] labels: %s' % (self.labels)
+
             threads = []
             for idx, fname in enumerate(fnames):
                 t = Thread(target=self.load, args=(fname, idx,))
@@ -94,5 +94,4 @@ class Base(object):
                 t.join()
         return
 
-def with_color(c, s):
-    return "\x1b[%dm%s\x1b[0m" % (c, s)
+

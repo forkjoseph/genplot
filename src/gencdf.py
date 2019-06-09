@@ -64,8 +64,6 @@ class CDF(base):
 
         plt.ylim(ylim[0], ylim[1])
         plt.xlim(xlim[0], xlim[1])
-        plt.legend(loc='lower right')
-        plt.legend(prop={'size':16})
 
         plt.xlabel(self.xlabel, fontsize=14)
         plt.ylabel(self.ylabel, fontsize=14)
@@ -73,13 +71,15 @@ class CDF(base):
         plt.xticks(xticks, fontsize=14)
         yticks = plt.gca().get_yticks()
         plt.yticks(yticks, fontsize=14)
-
+        plt.legend(loc='lower right', prop={'size': 16})
+        return
 
     def stat(self):
         for obj in self.objs:
             print '[BONUS] for file \"%s\"' % (obj.fname)
             print '[BONUS]', with_color(31, 'tails: ' + self.tail(obj))
             print '[BONUS]', with_color(31, 'stats: ' + self.stats(obj))
+        return
             
         
     ''' returns 95, 99, 99.9 by default '''
@@ -114,7 +114,12 @@ class CDF(base):
         xmax = '{:.3f}'.format(xmax)
         median = '{:.3f}'.format(np.nanmedian(obj.data))
         mean = '{:.3f}'.format(np.nanmean(obj.data))
+        # xlen = '{:d}'.format(len(obj.xs))
+        # ylen = '{:d}'.format(len(obj.xs))
+        dlen = '{:d}'.format(len(obj.data))
         return str({'min': xmin, 'max': xmax,
-                'median': median, 'mean': mean})
+                'median': median, 'mean': mean,
+                # 'X-points': xlen, 'Y-points': ylen,
+                'data points': dlen, })
         # return str({'min': xmin, 'max': xmax,
         #         'median': median, })
