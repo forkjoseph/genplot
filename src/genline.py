@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from base import Base as base
 
 class Line(base):
-    def __init__(self, debug=False, adjust=None):
+    def __init__(self, debug=False, adjust=None, usemp=False):
         super(Line, self).__init__(debug, adjust)
         self.gentype = 'Line'
         self.xlabel = 'Frame Number'
@@ -15,8 +15,8 @@ class Line(base):
         self.ymin = 0.0
         self.ymax = float('inf')
 
-    def load(self, fname):
-        return super(Line, self).load(fname)
+    def load(self, fname, myidx=0):
+        return super(Line, self).load(fname, myidx)
 
     def loadall(self, fnames):
         return super(Line, self).loadall(fnames)
@@ -31,11 +31,11 @@ class Line(base):
         for obj in self.objs:
             xs, ys = obj.xs, obj.ys
             label = obj.label
-            if len(legends) >= obj.idx:
-                label = legends[obj.idx]
+            # if len(legends) >= obj.idx:
+            #     label = legends[obj.idx]
             self.draw(xs, ys, label=label, ax=ax)
 
-        if limits is None:
+        if limits[0] == None or limits[0][0] == None:
             ''' x-axis --> len of data '''
             ''' y-axis --> min/max of data '''
             ylim = (float('inf'), float('-inf'))
@@ -62,7 +62,7 @@ class Line(base):
 #                 xlim = (0.0, xlim[1])
 
         # plt.xlim(xlim[0], xlim[1])
-        print '[DEBUG] Y-axis limit %s' % (str(ylim))
+        # print '[DEBUG] Y-axis limit %s' % (str(ylim))
         if ax is not None:
             ax.set_ylim(ylim[0], ylim[1])
         else:

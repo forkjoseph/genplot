@@ -11,6 +11,7 @@ def with_color(c, s):
 def saveplot(plt, args):
     figname = args.outname
     basedir = args.basedir
+    outname = args.outname
     if basedir is None:
         savename = outname
     else:

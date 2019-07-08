@@ -113,7 +113,7 @@ if __name__ == '__main__':
         obj.stat()
     
     if args.outname:
-        saveplot(plt, args.outname, basedir=args.basedir)
+        saveplot(plt, args)
     print PINFO + 'showing the graph ¯\\_(ツ)_/¯'
     try:
         plt.show()
