@@ -35,6 +35,8 @@ class CDF(base):
             label = obj.label
             if len(legends) > 0 and len(legends) >= obj.idx:
                 label = legends[obj.idx]
+            else:
+                label = obj.fname
             self.draw(xs, ys, label=label, ax=ax)
 
         if limits is None:
@@ -68,10 +70,16 @@ class CDF(base):
         plt.xlabel(self.xlabel, fontsize=14)
         plt.ylabel(self.ylabel, fontsize=14)
         xticks = plt.gca().get_xticks()
+        # print "Xticks", xticks, max(xticks)
+        # xticks = list(np.arange(0, max(xticks) + 1, 25))
+        # print xticks
         plt.xticks(xticks, fontsize=14)
         yticks = plt.gca().get_yticks()
+        # print "Yticks", yticks
         plt.yticks(yticks, fontsize=14)
-        plt.legend(loc='lower right', prop={'size': 16})
+        # plt.legend(loc='lower right', prop={'size': 16})
+        # plt.legend(loc='best', prop={'size': 16})
+        plt.legend(loc='upper left', prop={'size': 16})
         return
 
     def stat(self):

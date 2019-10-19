@@ -36,7 +36,14 @@ def saveplot(plt, args):
 
     plt.savefig(__tmp)
     from subprocess import call
-    call(["pdfcrop", __tmp, __tmp2])
+    try:
+        call(["pdfcrop", __tmp, __tmp2])
+    except OSError as e:
+        print with_color(31, '[ERROR] ' + str(e))
+        print 'Did you install \"pdfcrop\"???'
+        print '   Mac: sudo tlmgr install pdfcrop'
+        sys.exit(-1)
+
     call(["rm", "-f", __tmp])
     if realsuffix == '.pdf':
         call(["cp", __tmp2, savename + suffix])

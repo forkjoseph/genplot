@@ -18,6 +18,7 @@ class DataModel(object):
     def parse(self, fname):
         self.fname = os.path.basename(fname)
         with open(fname) as f:
+            idx = 0
             for c in f.readlines():
                 c = c.strip()
                 if '/*' in c or '#' in c:
@@ -41,24 +42,32 @@ class DataModel(object):
                         if self.debug is True:
                             print ('[DEBUG] setting legend in parse \"%s\"' % self.label)
                     continue
+
                 try:
                     c = float(c)
                 except ValueError as e:
-                    tmp = c.split(' ')
-                    if len(tmp) == 2:
-                        idx = tmp[0]
-                        c = float(tmp[1])
-                    # else:
-                    #     print '\x1b[33m[ERROR] can\'t parse %s\x1b[0m' % (c)
-                    #     raise e
-                    else:
-                        tmp = c.split('\t')
+                    if ':' in c:
+                        ## assuming the data point is right handed
+                        tmp = c.split(':')
                         if len(tmp) == 2:
-                            idx = tmp[0]
+                            lidx = tmp[0]
                             c = float(tmp[1])
+                    else:
+                        tmp = c.split(' ')
+                        if len(tmp) == 2:
+                            lidx = tmp[0]
+                            c = float(tmp[1])
+                        # else:
+                        #     print '\x1b[33m[ERROR] can\'t parse %s\x1b[0m' % (c)
+                        #     raise e
                         else:
-                            print ('\x1b[33m[WARNING] skipping string \"%s\"\x1b[0m' % (c))
-                            continue
+                            tmp = c.split('\t')
+                            if len(tmp) == 2:
+                                lidx = tmp[0]
+                                c = float(tmp[1])
+                            else:
+                                print ('\x1b[33m[WARNING] skipping string \"%s\" at line %d \x1b[0m' % (c, idx))
+                                continue
 
                 if self.adjust is not None:
                     tmp = self.adjust
@@ -66,6 +75,7 @@ class DataModel(object):
                     adjusted = eval(tmp)
                     c = float(adjusted)
                 self.data.append(c)
+		idx += 1
         return
 
 class DataCDF(DataModel):

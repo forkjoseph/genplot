@@ -5,6 +5,7 @@ import sys
 sys.dont_write_bytecode = True
 import argparse
 import matplotlib
+# matplotlib.use('TKAgg')
 # matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
@@ -88,6 +89,8 @@ if __name__ == '__main__':
         is_parsed = args.parsed
         print PINFO + 'data is already parsed?', is_parsed
         obj = Bar(debug, adjust=adjust, usemp=usemp, parsed=is_parsed)
+    elif plotmode == 'histo':
+        obj = Histo(debug, adjust, usemp)
     
     if xlabel is not None:
         obj.xlabel = xlabel
@@ -97,6 +100,7 @@ if __name__ == '__main__':
     fig = plt.figure(figsize=(10, 4.75))
     ax = fig.add_subplot(111)
     ax.grid(which='major', axis='y', linestyle='--', linewidth=0.2)
+    # ax.grid(which='major', axis='x', linestyle='--', linewidth=0.2)
 
     # print '[INFO] file nemas:', filenames
     obj.loadall(filenames)

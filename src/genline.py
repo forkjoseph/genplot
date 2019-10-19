@@ -28,12 +28,25 @@ class Line(base):
             ax.plot(xs, ys, label=label, linewidth='2')
 
     def drawall(self, labels=None, ax=None, limits=None, legends=[]):
+        if self.debug:
+            print '[DEBUG] labels:', labels
         for obj in self.objs:
             xs, ys = obj.xs, obj.ys
-            label = obj.label
+
+            if self.debug:
+                print '[DEBUG] obj.label:', obj.label
+
+            if labels is None and obj.label is None:
+                label = obj.fname
+            # elif labels is not None:
+            else:
+                label = obj.label
+
             # if len(legends) >= obj.idx:
             #     label = legends[obj.idx]
             self.draw(xs, ys, label=label, ax=ax)
+
+        xlim, ylim = limits[0], limits[1]
 
         if limits[0] == None or limits[0][0] == None:
             ''' x-axis --> len of data '''
@@ -61,12 +74,14 @@ class Line(base):
 #             if xlim[0] is None:
 #                 xlim = (0.0, xlim[1])
 
-        # plt.xlim(xlim[0], xlim[1])
+
         # print '[DEBUG] Y-axis limit %s' % (str(ylim))
         if ax is not None:
             ax.set_ylim(ylim[0], ylim[1])
+            ax.set_xlim(xlim[0], xlim[1])
         else:
             plt.ylim(ylim[0], ylim[1])
+            plt.xlim(xlim[0], xlim[1])
 
         plt.legend(loc='best', prop={'size':16})
         plt.xlabel(self.xlabel, fontsize=14)
