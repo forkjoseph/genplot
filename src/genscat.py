@@ -2,7 +2,7 @@ import sys, os
 sys.dont_write_bytecode = True
 import numpy as np
 import matplotlib.pyplot as plt
-from base import Base as base
+from .base import Base as base
 
 class Scat(base):
     def __init__(self, debug=False, adjust=None):
@@ -52,7 +52,7 @@ class Scat(base):
                     ylim = (ylim[0], ymax)
             ''' well... let's just set xlim=(0, own) '''
             # ylim = (0.0, ylim[1])
-            print '[DEBUG] Y-axis limit %s' % (str(ylim))
+            print('[DEBUG] Y-axis limit %s' % (str(ylim)))
 #         else:
 #             xlim = limits[0]
 #             ylim = limits[1]
@@ -63,7 +63,7 @@ class Scat(base):
 #                 xlim = (0.0, xlim[1])
 
         # plt.xlim(xlim[0], xlim[1])
-        print '[DEBUG] Y-axis limit %s' % (str(ylim))
+        print('[DEBUG] Y-axis limit %s' % (str(ylim)))
         if ax is not None:
             ax.set_ylim(ylim[0], ylim[1])
         else:
@@ -78,10 +78,10 @@ class Scat(base):
         ## y ticks -> 6 items
         xticks = plt.gca().get_xticks()
         plt.xticks(xticks, fontsize=14)
-        print xticks
+        print(xticks)
         yticks = plt.gca().get_yticks()
         plt.yticks(yticks, fontsize=14)
-        print yticks
+        print(yticks)
 
 
 

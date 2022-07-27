@@ -1,8 +1,8 @@
 import sys
 sys.dont_write_bytecode = True
 import os
-from model import *
-from util import with_color
+from .model import *
+from .util import with_color
 import multiprocessing as mp
 from threading import Thread
 
@@ -43,8 +43,8 @@ class Base(object):
             raise Exception('Unsupported gentype')
 
         if self.debug is True:
-            print '[DEBUG] gentype %s loaded for %s' % \
-                (gentype, fname)
+            print('[DEBUG] gentype %s loaded for %s' % \
+                (gentype, fname))
 
         if self.usemp is False:
             self.fnames.append(fname)
@@ -71,16 +71,16 @@ class Base(object):
             for idx, fname in enumerate(fnames):
                 self.load(fname)
                 if self.debug is True:
-                    print ('[DEBUG] %s is loaded' % (fname))
+                    print(('[DEBUG] %s is loaded' % (fname)))
         else:
             dlen = len(fnames)
             self.fnames = [None for x in range(dlen)]
             self.objs = [None for x in range(dlen)]
             self.labels = [None for x in range(dlen)]
             if self.debug is True:
-                print '[DEBUG] fnames: %s' % (self.fnames)
-                print '[DEBUG] objs: %s' % (self.objs)
-                print '[DEBUG] labels: %s' % (self.labels)
+                print('[DEBUG] fnames: %s' % (self.fnames))
+                print('[DEBUG] objs: %s' % (self.objs))
+                print('[DEBUG] labels: %s' % (self.labels))
 
             threads = []
             for idx, fname in enumerate(fnames):
@@ -89,7 +89,7 @@ class Base(object):
                 t.start()
 
             if self.debug is True:
-                print '[DEBUG] waiting for parsers to be done...'
+                print('[DEBUG] waiting for parsers to be done...')
             for t in threads:
                 t.join()
         return

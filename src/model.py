@@ -33,14 +33,14 @@ class DataModel(object):
                         self.label = legend.strip()
                         self.legend = legend.strip()
                         if self.debug is True:
-                            print ('[DEBUG] setting legend in parse \"%s\"' % self.label)
+                            print(('[DEBUG] setting legend in parse \"%s\"' % self.label))
                     else:
                         legend = c.split('#')[1]
                         self.label = legend.strip()
                         self.legend = legend.strip()
 
                         if self.debug is True:
-                            print ('[DEBUG] setting legend in parse \"%s\"' % self.label)
+                            print(('[DEBUG] setting legend in parse \"%s\"' % self.label))
                     continue
 
                 try:
@@ -66,7 +66,7 @@ class DataModel(object):
                                 lidx = tmp[0]
                                 c = float(tmp[1])
                             else:
-                                print ('\x1b[33m[WARNING] skipping string \"%s\" at line %d \x1b[0m' % (c, idx))
+                                print(('\x1b[33m[WARNING] skipping string \"%s\" at line %d \x1b[0m' % (c, idx)))
                                 continue
 
                 if self.adjust is not None:
@@ -75,7 +75,7 @@ class DataModel(object):
                     adjusted = eval(tmp)
                     c = float(adjusted)
                 self.data.append(c)
-		idx += 1
+        idx += 1
         return
 
 class DataCDF(DataModel):
@@ -140,7 +140,7 @@ class DataHisto(DataModel):
     def load(self, fname, myidx=0):
         super(DataHisto, self).parse(fname)
         self.xmin, self.xmax = min(self.data), max(self.data)
-        self.bins = range(self.xmin, self.xmax, self.bin)
+        self.bins = list(range(self.xmin, self.xmax, self.bin))
         self.xs = self.data
         self.ys = self.bins
         return self.xs, self.ys, None
@@ -160,7 +160,7 @@ class DataBar(DataModel):
 
     def load(self, fname, myidx=0, argv=None):
         if self.skip_parsing is True:
-            self.data = [fname] 
+            self.data = [fname]
             if argv is not None:
                 self.label = argv
                 self.legend = argv
@@ -173,7 +173,7 @@ class DataBar(DataModel):
         self.low = self.avg - self.err
         self.high = self.avg + self.err
         self.dmin, self.dmax = min(self.data), max(self.data)
-        
+
         self.xs = self.idx
         self.ys = self.avg
         self.opt= self.err # [optional]
@@ -184,11 +184,11 @@ class DataBar(DataModel):
 
 
 if __name__ == '__main__':
-    print 'test...'
+    print('test...')
     # obj = DataBar(0)
     obj = DataCDF()
     obj.load('samples/data1.dat')
-    for k, v in obj.__dict__.iteritems():
+    for k, v in obj.__dict__.items():
         if k != 'data':
-            print k,v 
+            print(k,v)
 

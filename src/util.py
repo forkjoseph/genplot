@@ -32,16 +32,16 @@ def saveplot(plt, args):
     bname = os.path.basename(savename)
     __tmp = dname + '/.tmp-' + bname + suffix
     __tmp2 = dname + '/.tmp2-' + bname + suffix
-    print PINFO + 'saving to {}{}'.format(savename, suffix)
+    print(PINFO + 'saving to {}{}'.format(savename, suffix))
 
     plt.savefig(__tmp)
     from subprocess import call
     try:
         call(["pdfcrop", __tmp, __tmp2])
     except OSError as e:
-        print with_color(31, '[ERROR] ' + str(e))
-        print 'Did you install \"pdfcrop\"???'
-        print '   Mac: sudo tlmgr install pdfcrop'
+        print(with_color(31, '[ERROR] ' + str(e)))
+        print('Did you install \"pdfcrop\"???')
+        print('   Mac: sudo tlmgr install pdfcrop')
         sys.exit(-1)
 
     call(["rm", "-f", __tmp])
@@ -49,16 +49,16 @@ def saveplot(plt, args):
         call(["cp", __tmp2, savename + suffix])
 
     if realsuffix == '.png':
-        print PINFO + 'converting to {}{}'.format(savename, realsuffix)
+        print(PINFO + 'converting to {}{}'.format(savename, realsuffix))
         call(["convert", "-density", "400", __tmp2, savename + realsuffix])
     call(["rm", "-f", __tmp2])
-    print PINFO + 'saved to {}{}'.format(savename, realsuffix)
+    print(PINFO + 'saved to {}{}'.format(savename, realsuffix))
     return plt
 
 def get_filenames(args): 
     if args.basedir and args.baseiter:
         errmsg = 'both args cannot be supported! (choose either)'
-        print with_color(31, PERR + errmsg)
+        print(with_color(31, PERR + errmsg))
         # parser.print_help()
         raise Exception(errmsg)
 
@@ -83,7 +83,7 @@ def get_filenames(args):
                 filenames.append(basedir + '/' + f)
     if len(filenames) < 1:
         errmsg = 'You must provide data files to draw mannnnn!'
-        print with_color(31, PERR + errmsg)
+        print(with_color(31, PERR + errmsg))
         raise Exception(errmsg)
         sys.exit(-1)
     return filenames
@@ -96,10 +96,10 @@ def get_others(args, filenames=[]):
     if len(legends) != 0:
         if len(legends) < len(filenames):
             msg = "Number of legends is SMALLER than number of files."
-            print with_color(31, PERR + msg)
+            print(with_color(31, PERR + msg))
             raise Exception(msg)
         elif len(legends) != len(filenames):
             msg = '\n[WARN] # of legends mismatch w/ # of files. Are you sure about this?'
-            print with_color(33, msg)
+            print(with_color(33, msg))
     return legends, adjust
 

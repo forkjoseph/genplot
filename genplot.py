@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3.6
 # -*- coding: utf-8 -*-
 """ simplest ploting tool for a paper! """
 import sys
@@ -21,20 +21,20 @@ LIMITATION = "limitation: draws one graph PER run... :(\n" + \
         "Joseph suggests using a bash script to call this genplot " + \
         "in order to generate multiple graphs at once."
 
-parser = argparse.ArgumentParser(description="Simplest plotting tool\n", 
+parser = argparse.ArgumentParser(description="Simplest plotting tool\n",
         epilog=with_color(31, LIMITATION))
 ## mandatory arguments to plot the graph!!
-parser.add_argument('datafiles', nargs='*', 
+parser.add_argument('datafiles', nargs='*',
         help="data file to draw (ex. ./genplot.py -m cdf abc.dat)")
 parser.add_argument('-m', '--mode', dest='mode', type=str, required=True,
         choices=['scat', 'bar', 'histo', 'line', 'cdf'],
         help="which plot mode to use")
-## EITHER or !!!! 
+## EITHER or !!!!
 parser.add_argument('--basedir', dest='basedir', type=str,
         help="base directory to iterate for data file")
 parser.add_argument('--baseiter', dest='baseiter', type=str,
         help="base **iterator** mode (useful when feeding data w/ a format)")
-## optional arguements 
+## optional arguements
 parser.add_argument('--adjust', dest='adjust', type=str, default=None)
 parser.add_argument('--xmin', dest='xmin', type=float, default=None)
 parser.add_argument('--xmax', dest='xmax', type=float, default=None)
@@ -47,7 +47,7 @@ parser.add_argument('--xlabel', dest='xlabel', type=str)
 parser.add_argument('--ylabel', dest='ylabel', type=str)
 parser.add_argument('-l', '--legends', dest='legends', type=str, nargs='+')
 parser.add_argument('-o', '--output', dest='outname', type=str,
-        help="PDF file name (ex. abc.pdf or /tmp/abc). Default is PDF format. " + 
+        help="PDF file name (ex. abc.pdf or /tmp/abc). Default is PDF format. " +
         "For PNG output, make sure to pass FILENAME.png as arguement")
 parser.add_argument('-M', '--mp', action='store_true',
         help="[EXP] Use multithreads to load data (helpful for big datasets)")
@@ -68,16 +68,16 @@ if __name__ == '__main__':
     filenames = get_filenames(args)
     legends, adjust = get_others(args, filenames=filenames)
 
-    print '=' * 32, 'INFOS', '=' * 33
-    print '   plotmode:', plotmode 
-    print '  datafiles:', filenames
-    print '     limits: {}, {}'.format(xlim, ylim)
-    print '     lables: x=\"{}\", y=\"{}\"'.format(xlabel, ylabel)
-    print '    legends: {}'.format(legends)
-    print '     adjust: %s' % (adjust)
-    print '   out name: %s' % (outname)
-    print '      debug: %s' % (debug)
-    print '=' * 72
+    print('=' * 32, 'INFOS', '=' * 33)
+    print('   plotmode:', plotmode)
+    print('  datafiles:', filenames)
+    print('     limits: {}, {}'.format(xlim, ylim))
+    print('     lables: x=\"{}\", y=\"{}\"'.format(xlabel, ylabel))
+    print('    legends: {}'.format(legends))
+    print('     adjust: %s' % (adjust))
+    print('   out name: %s' % (outname))
+    print('      debug: %s' % (debug))
+    print('=' * 72)
 
     if plotmode == 'line':
         obj = Line(debug, adjust, usemp)
@@ -87,11 +87,11 @@ if __name__ == '__main__':
         obj = Scat(debug, adjust, usemp)
     elif plotmode == 'bar':
         is_parsed = args.parsed
-        print PINFO + 'data is already parsed?', is_parsed
+        print(PINFO + 'data is already parsed?', is_parsed)
         obj = Bar(debug, adjust=adjust, usemp=usemp, parsed=is_parsed)
     elif plotmode == 'histo':
         obj = Histo(debug, adjust, usemp)
-    
+
     if xlabel is not None:
         obj.xlabel = xlabel
     if ylabel is not None:
@@ -115,12 +115,12 @@ if __name__ == '__main__':
     obj.drawall(ax=ax, limits=(xlim, ylim), legends=legends)
     if plotmode == 'cdf':
         obj.stat()
-    
+
     if args.outname:
         saveplot(plt, args)
-    print PINFO + 'showing the graph ¯\\_(ツ)_/¯'
+    print(PINFO + 'showing the graph ¯\\_(ツ)_/¯')
     try:
         plt.show()
     except Exception:
-        print PERR + 'no display detected! Make sure to use --noshow option!'
+        print(PERR + 'no display detected! Make sure to use --noshow option!')
 

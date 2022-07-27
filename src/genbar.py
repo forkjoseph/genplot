@@ -4,7 +4,7 @@ sys.dont_write_bytecode = True
 import numpy as np
 import scipy.stats as ss
 import matplotlib.pyplot as plt
-from base import Base as base
+from .base import Base as base
 
 class Bar(base):
     def __init__(self, debug=False, adjust=None, usemp=False, parsed=False):
@@ -51,14 +51,14 @@ class Bar(base):
                             legend = legend.replace('*/', '')
                         self.xlabel = legend
                         if self.debug is True:
-                            print ('[DEBUG] setting legend in parse \"%s\"' %
-                                    self.xlabel)
+                            print(('[DEBUG] setting legend in parse \"%s\"' %
+                                    self.xlabel))
                     else:
                         legend = c.split('#')[1]
                         self.xlabel = legend
                         if self.debug is True:
-                            print ('[DEBUG] setting legend in parse \"%s\"' %
-                                    self.xlabel)
+                            print(('[DEBUG] setting legend in parse \"%s\"' %
+                                    self.xlabel))
                     continue
 
                 xlabel = None
@@ -74,7 +74,7 @@ class Bar(base):
                         xlabel = tmp[0]
                         c = float(tmp[1])
                     else:
-                        print ('\x1b[33m[WARNING] skipping string \"%s\"\x1b[0m' % (c))
+                        print(('\x1b[33m[WARNING] skipping string \"%s\"\x1b[0m' % (c)))
                         continue
 
                 if self.adjust is not None:
@@ -84,7 +84,7 @@ class Bar(base):
                     c = float(adjusted)
                 dcnt += 1
                 if self.debug is True:
-                    print ('[DEBUG] %d: %f' % (dcnt, c))
+                    print(('[DEBUG] %d: %f' % (dcnt, c)))
                     super(Bar, self).load([c], dcnt, argv=xlabel)
             return 
             
@@ -113,7 +113,7 @@ class Bar(base):
 
         ypos = np.arange(len(self.objs))
         legends = labels
-        print '[INFO] legends', legends
+        print('[INFO] legends', legends)
         plt.xticks(ypos, legends, rotation=45)
         plt.margins(0.05)
         plt.subplots_adjust(bottom=0.175)

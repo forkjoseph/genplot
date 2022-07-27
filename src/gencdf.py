@@ -2,8 +2,8 @@ import sys, os
 sys.dont_write_bytecode = True
 import numpy as np
 import matplotlib.pyplot as plt
-from base import Base as base
-from base import *
+from .base import Base as base
+from .base import *
 
 class CDF(base):
     def __init__(self, debug=False, adjust=None, usemp=False):
@@ -54,7 +54,7 @@ class CDF(base):
             ''' well... let's just set xlim=(0, own) '''
             xlim = (0.0, xlim[1])
             if self.debug is True:
-                print '[DEBUG] xlimit:', xlim
+                print('[DEBUG] xlimit:', xlim)
         else:
             xlim = limits[0]
             ylim = limits[1]
@@ -84,9 +84,9 @@ class CDF(base):
 
     def stat(self):
         for obj in self.objs:
-            print '[BONUS] for file \"%s\"' % (obj.fname)
-            print '[BONUS]', with_color(31, 'tails: ' + self.tail(obj))
-            print '[BONUS]', with_color(31, 'stats: ' + self.stats(obj))
+            print('[BONUS] for file \"%s\"' % (obj.fname))
+            print('[BONUS]', with_color(31, 'tails: ' + self.tail(obj)))
+            print('[BONUS]', with_color(31, 'stats: ' + self.stats(obj)))
         return
             
         

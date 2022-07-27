@@ -2,7 +2,7 @@ import sys, os
 sys.dont_write_bytecode = True
 import numpy as np
 import matplotlib.pyplot as plt
-from base import Base as base
+from .base import Base as base
 
 class Line(base):
     def __init__(self, debug=False, adjust=None, usemp=False):
@@ -29,12 +29,12 @@ class Line(base):
 
     def drawall(self, labels=None, ax=None, limits=None, legends=[]):
         if self.debug:
-            print '[DEBUG] labels:', labels
+            print('[DEBUG] labels:', labels)
         for obj in self.objs:
             xs, ys = obj.xs, obj.ys
 
             if self.debug:
-                print '[DEBUG] obj.label:', obj.label
+                print('[DEBUG] obj.label:', obj.label)
 
             if labels is None and obj.label is None:
                 label = obj.fname
@@ -64,7 +64,7 @@ class Line(base):
                     ylim = (ylim[0], ymax)
             ''' well... let's just set xlim=(0, own) '''
             # ylim = (0.0, ylim[1])
-            print '[DEBUG] Y-axis limit %s' % (str(ylim))
+            print('[DEBUG] Y-axis limit %s' % (str(ylim)))
 #         else:
 #             xlim = limits[0]
 #             ylim = limits[1]
@@ -92,8 +92,8 @@ class Line(base):
         ## y ticks -> 6 items
         xticks = plt.gca().get_xticks()
         plt.xticks(xticks, fontsize=14)
-        print xticks
+        print(xticks)
         yticks = plt.gca().get_yticks()
         plt.yticks(yticks, fontsize=14)
-        print yticks
+        print(yticks)
 
